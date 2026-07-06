@@ -1,0 +1,15 @@
+{
+  "name": "CantaJá — Karaokê",
+  "short_name": "CantaJá",
+  "description": "Karaokê com IA, ranking e desafio diário",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0d2e",
+  "theme_color": "#c026d3",
+  "icons": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
