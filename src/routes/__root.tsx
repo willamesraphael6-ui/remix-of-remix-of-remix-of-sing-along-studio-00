@@ -63,8 +63,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "CantaJá — Karaokê com IA e ranking" },
       { name: "twitter:description", content: "Cante suas músicas favoritas, receba nota da IA e dispute o ranking do melhor do canto. PWA para iPhone com lembrete diário." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/896ab72a-4978-4dd9-9a29-bb4f0af3c7ff/id-preview-b54cd2bb--e57caaad-9078-49f2-902a-c9b9d109ae88.lovable.app-1783294025998.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/896ab72a-4978-4dd9-9a29-bb4f0af3c7ff/id-preview-b54cd2bb--e57caaad-9078-49f2-902a-c9b9d109ae88.lovable.app-1783294025998.png" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5ace8949-f488-4e63-a82c-ca0f64433250/id-preview-0112b7be--aed86803-8e7c-430a-b6f6-3542610a3a96.lovable.app-1783351180394.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5ace8949-f488-4e63-a82c-ca0f64433250/id-preview-0112b7be--aed86803-8e7c-430a-b6f6-3542610a3a96.lovable.app-1783351180394.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
