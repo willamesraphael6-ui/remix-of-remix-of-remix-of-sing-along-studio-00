@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import webpush from "web-push";
 
 // Called by pg_cron every hour; sends a push to every enabled subscription.
 export const Route = createFileRoute("/api/public/cron/daily-reminder")({
@@ -7,6 +6,7 @@ export const Route = createFileRoute("/api/public/cron/daily-reminder")({
     handlers: {
       POST: async () => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { default: webpush } = await import("web-push");
         webpush.setVapidDetails(
           process.env.VAPID_SUBJECT || "mailto:hello@cantaja.app",
           process.env.VAPID_PUBLIC_KEY!,
