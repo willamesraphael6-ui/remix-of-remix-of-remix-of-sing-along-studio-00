@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { WavRecorder } from "@/lib/wav-recorder";
 import { supabase } from "@/integrations/supabase/client";
 import { getLyrics } from "@/lib/lyrics.functions";
+import { loadYouTubeApi, type YTPlayer } from "@/lib/youtube-iframe";
 import { Mic, Square, ArrowLeft, Loader2, Volume2, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,46 +12,6 @@ export const Route = createFileRoute("/_authenticated/sing/$videoId")({
   validateSearch: (s: Record<string, unknown>): { title?: string } => ({ title: typeof s.title === "string" ? s.title : undefined }),
   component: SingScreen,
 });
-
-// Minimal typing for the YouTube IFrame API we use.
-type YTPlayer = {
-  getCurrentTime: () => number;
-  playVideo: () => void;
-  pauseVideo: () => void;
-  destroy: () => void;
-};
-type YTNamespace = {
-  Player: new (
-    el: HTMLElement | string,
-    opts: {
-      videoId: string;
-      playerVars?: Record<string, string | number>;
-      events?: { onReady?: (e: { target: YTPlayer }) => void };
-    },
-  ) => YTPlayer;
-};
-declare global {
-  interface Window {
-    YT?: YTNamespace;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-
-function loadYouTubeApi(): Promise<YTNamespace> {
-  return new Promise((resolve) => {
-    if (window.YT?.Player) { resolve(window.YT); return; }
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      prev?.();
-      if (window.YT) resolve(window.YT);
-    };
-    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-      const s = document.createElement("script");
-      s.src = "https://www.youtube.com/iframe_api";
-      document.head.appendChild(s);
-    }
-  });
-}
 
 function SingScreen() {
   const { videoId } = Route.useParams();

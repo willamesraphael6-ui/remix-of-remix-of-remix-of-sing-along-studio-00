@@ -3,45 +3,11 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { getPerformanceById } from "@/lib/leaderboard.functions";
 import { getRecordingDownloadUrl } from "@/lib/storage.functions";
+import { loadYouTubeApi, type YTPlayer } from "@/lib/youtube-iframe";
 import { Trophy, RotateCw, Home, Sparkles, Download, Loader2, Play, Pause } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/result/$id")({ component: ResultScreen });
-
-type YTPlayer = {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  seekTo: (s: number, allow: boolean) => void;
-  destroy: () => void;
-};
-type YTNamespace = {
-  Player: new (
-    el: HTMLElement | string,
-    opts: {
-      videoId: string;
-      playerVars?: Record<string, string | number>;
-      events?: { onReady?: (e: { target: YTPlayer }) => void };
-    },
-  ) => YTPlayer;
-};
-declare global {
-  interface Window {
-    YT?: YTNamespace;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-function loadYT(): Promise<YTNamespace> {
-  return new Promise((resolve) => {
-    if (window.YT?.Player) { resolve(window.YT); return; }
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => { prev?.(); if (window.YT) resolve(window.YT); };
-    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
-      const s = document.createElement("script");
-      s.src = "https://www.youtube.com/iframe_api";
-      document.head.appendChild(s);
-    }
-  });
-}
 
 function ResultScreen() {
   const { id } = Route.useParams();
@@ -75,7 +41,7 @@ function ResultScreen() {
   useEffect(() => {
     if (!youtubeId) return;
     let cancelled = false;
-    loadYT().then((YT) => {
+    loadYouTubeApi().then((YT) => {
       if (cancelled || !playerElRef.current) return;
       playerRef.current = new YT.Player(playerElRef.current, {
         videoId: youtubeId,
