@@ -25,6 +25,8 @@ export const Route = createFileRoute("/api/upload-recording")({
         const audio = form.get("audio");
         const youtubeId = String(form.get("youtube_id") ?? "");
         const title = String(form.get("title") ?? "Sem título");
+        const startSecondsRaw = Number(form.get("start_seconds") ?? 0);
+        const startSeconds = Number.isFinite(startSecondsRaw) ? Math.max(0, startSecondsRaw) : 0;
         if (!(audio instanceof File) || !youtubeId) {
           return new Response(JSON.stringify({ error: "bad_request" }), { status: 400 });
         }
@@ -101,6 +103,7 @@ export const Route = createFileRoute("/api/upload-recording")({
             score,
             ai_feedback: feedback,
             transcript,
+            start_seconds: startSeconds,
           })
           .select("id")
           .single();

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { WavRecorder } from "@/lib/wav-recorder";
 import { supabase } from "@/integrations/supabase/client";
 import { getLyrics } from "@/lib/lyrics.functions";
+import { loadYouTubeApi, type YTPlayer } from "@/lib/youtube-iframe";
 import { Mic, Square, ArrowLeft, Loader2, Volume2, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,6 +18,9 @@ function SingScreen() {
   const { title } = Route.useSearch();
   const navigate = useNavigate();
   const recorderRef = useRef<WavRecorder | null>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
+  const playerElRef = useRef<HTMLDivElement | null>(null);
+  const startSecondsRef = useRef(0);
   const [state, setState] = useState<"idle" | "recording" | "uploading">("idle");
   const [level, setLevel] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -28,6 +32,22 @@ function SingScreen() {
     enabled: showLyrics && !!title,
     staleTime: 1000 * 60 * 60,
   });
+
+  useEffect(() => {
+    let cancelled = false;
+    loadYouTubeApi().then((YT) => {
+      if (cancelled || !playerElRef.current) return;
+      playerRef.current = new YT.Player(playerElRef.current, {
+        videoId,
+        playerVars: { autoplay: 0, modestbranding: 1, rel: 0, playsinline: 1 },
+      });
+    });
+    return () => {
+      cancelled = true;
+      try { playerRef.current?.destroy(); } catch { /* noop */ }
+      playerRef.current = null;
+    };
+  }, [videoId]);
 
   useEffect(() => {
     if (state !== "recording") return;
@@ -43,6 +63,11 @@ function SingScreen() {
       const rec = new WavRecorder();
       await rec.start();
       recorderRef.current = rec;
+      // Capture where in the YouTube video the recording starts, then play.
+      try {
+        startSecondsRef.current = playerRef.current?.getCurrentTime() ?? 0;
+        playerRef.current?.playVideo();
+      } catch { /* player not ready — start_seconds stays 0 */ }
       setSeconds(0);
       setState("recording");
     } catch (e) {
@@ -55,6 +80,7 @@ function SingScreen() {
     setState("uploading");
     try {
       const blob = await recorderRef.current.stop();
+      try { playerRef.current?.pauseVideo(); } catch { /* noop */ }
       if (blob.size < 3000) {
         toast.error("Gravação muito curta. Tenta de novo.");
         setState("idle"); return;
@@ -66,6 +92,7 @@ function SingScreen() {
       form.append("audio", blob, "recording.wav");
       form.append("youtube_id", videoId);
       form.append("title", title ?? "Sem título");
+      form.append("start_seconds", String(Math.max(0, startSecondsRef.current)));
       const res = await fetch("/api/upload-recording", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -104,13 +131,7 @@ function SingScreen() {
       </header>
 
       <div className="rounded-3xl overflow-hidden aspect-video glass mb-4">
-        <iframe
-          title="karaoke"
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=0&modestbranding=1&rel=0&playsinline=1`}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-          className="w-full h-full"
-        />
+        <div ref={playerElRef} className="w-full h-full" />
       </div>
 
       {showLyrics && (
