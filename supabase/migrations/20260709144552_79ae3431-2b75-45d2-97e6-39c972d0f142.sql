@@ -1,0 +1,1 @@
+ALTER TABLE public.performances ADD COLUMN IF NOT EXISTS start_seconds REAL NOT NULL DEFAULT 0;

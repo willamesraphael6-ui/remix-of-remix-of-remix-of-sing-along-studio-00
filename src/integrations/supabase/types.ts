@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           id: string
           score: number
+          start_seconds: number
           title: string
           transcript: string | null
           user_id: string
@@ -32,6 +33,7 @@ export type Database = {
           created_at?: string
           id?: string
           score?: number
+          start_seconds?: number
           title: string
           transcript?: string | null
           user_id: string
@@ -43,6 +45,7 @@ export type Database = {
           created_at?: string
           id?: string
           score?: number
+          start_seconds?: number
           title?: string
           transcript?: string | null
           user_id?: string
