@@ -60,9 +60,14 @@ export type Database = {
           bio: string | null
           city: string | null
           created_at: string
+          current_streak: number
           id: string
+          last_sing_date: string | null
+          longest_streak: number
           performances_count: number
+          points: number
           stage_name: string
+          theme: string
           total_score: number
           updated_at: string
         }
@@ -72,9 +77,14 @@ export type Database = {
           bio?: string | null
           city?: string | null
           created_at?: string
+          current_streak?: number
           id: string
+          last_sing_date?: string | null
+          longest_streak?: number
           performances_count?: number
+          points?: number
           stage_name: string
+          theme?: string
           total_score?: number
           updated_at?: string
         }
@@ -84,9 +94,14 @@ export type Database = {
           bio?: string | null
           city?: string | null
           created_at?: string
+          current_streak?: number
           id?: string
+          last_sing_date?: string | null
+          longest_streak?: number
           performances_count?: number
+          points?: number
           stage_name?: string
+          theme?: string
           total_score?: number
           updated_at?: string
         }
