@@ -5,8 +5,9 @@ import { searchKaraoke, resolveYouTubeLink } from "@/lib/youtube.functions";
 import { addSongToHistory } from "@/lib/history.functions";
 import { getLeaderboard } from "@/lib/leaderboard.functions";
 import { getMyProfile } from "@/lib/profile.functions";
-import { Search, Link as LinkIcon, Play, Trophy, Loader2 } from "lucide-react";
+import { Search, Link as LinkIcon, Play, Trophy, Loader2, Moon, Flame, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { RELAX_UNLOCK_POINTS } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/home")({ component: HomeScreen });
 
@@ -46,6 +47,10 @@ function HomeScreen() {
 
   const top = leaders.data?.items?.[0];
   const stage = profile.data?.profile?.stage_name ?? "Cantor";
+  const p = profile.data?.profile as ({ points?: number; current_streak?: number } | undefined);
+  const points = Number(p?.points ?? 0);
+  const streak = Number(p?.current_streak ?? 0);
+  const relaxUnlocked = points >= RELAX_UNLOCK_POINTS;
 
   return (
     <div className="px-5 pt-4 max-w-md mx-auto">
@@ -60,6 +65,33 @@ function HomeScreen() {
             : <span className="text-lg">{stage[0]?.toUpperCase() ?? "C"}</span>}
         </Link>
       </header>
+
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="glass rounded-2xl p-3 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase text-muted-foreground">Pontos</p>
+            <p className="font-bold text-lg leading-none">{points}</p>
+          </div>
+        </div>
+        <div className="glass rounded-2xl p-3 flex items-center gap-2">
+          <Flame className={`w-5 h-5 ${streak > 0 ? "text-orange-400" : "text-muted-foreground"}`} />
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase text-muted-foreground">Streak</p>
+            <p className="font-bold text-lg leading-none">{streak} {streak === 1 ? "dia" : "dias"}</p>
+          </div>
+        </div>
+      </div>
+
+      <Link to="/relax" className="mb-4 glass rounded-2xl p-3 flex items-center gap-3 hover:border-primary transition">
+        <div className="w-10 h-10 rounded-full neon-gradient flex items-center justify-center"><Moon className="w-5 h-5 text-white" /></div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold">Modo relaxamento</p>
+          <p className="text-[11px] text-muted-foreground">
+            {relaxUnlocked ? "Sons pra dormir e recarregar a voz" : `Desbloqueia com ${RELAX_UNLOCK_POINTS} pts (${points}/${RELAX_UNLOCK_POINTS})`}
+          </p>
+        </div>
+      </Link>
 
       {top && (
         <Link to="/leaderboard" className="block mb-5 rounded-2xl neon-gradient p-4 relative overflow-hidden" style={{ boxShadow: "var(--shadow-glow)" }}>

@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadRecordingRouteImport } from './routes/api/upload-recording'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRelaxRouteImport } from './routes/_authenticated/relax'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
@@ -50,6 +51,11 @@ const ApiUploadRecordingRoute = ApiUploadRecordingRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRelaxRoute = AuthenticatedRelaxRouteImport.update({
+  id: '/relax',
+  path: '/relax',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/relax': typeof AuthenticatedRelaxRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/upload-recording': typeof ApiUploadRecordingRoute
   '/result/$id': typeof AuthenticatedResultIdRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedHomeRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/relax': typeof AuthenticatedRelaxRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/upload-recording': typeof ApiUploadRecordingRoute
   '/result/$id': typeof AuthenticatedResultIdRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/relax': typeof AuthenticatedRelaxRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/upload-recording': typeof ApiUploadRecordingRoute
   '/_authenticated/result/$id': typeof AuthenticatedResultIdRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/profile'
+    | '/relax'
     | '/settings'
     | '/api/upload-recording'
     | '/result/$id'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/leaderboard'
     | '/profile'
+    | '/relax'
     | '/settings'
     | '/api/upload-recording'
     | '/result/$id'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/leaderboard'
     | '/_authenticated/profile'
+    | '/_authenticated/relax'
     | '/_authenticated/settings'
     | '/api/upload-recording'
     | '/_authenticated/result/$id'
@@ -234,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/relax': {
+      id: '/_authenticated/relax'
+      path: '/relax'
+      fullPath: '/relax'
+      preLoaderRoute: typeof AuthenticatedRelaxRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -291,6 +310,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedRelaxRoute: typeof AuthenticatedRelaxRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedResultIdRoute: typeof AuthenticatedResultIdRoute
   AuthenticatedSingVideoIdRoute: typeof AuthenticatedSingVideoIdRoute
@@ -301,6 +321,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedRelaxRoute: AuthenticatedRelaxRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedResultIdRoute: AuthenticatedResultIdRoute,
   AuthenticatedSingVideoIdRoute: AuthenticatedSingVideoIdRoute,
@@ -320,13 +341,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

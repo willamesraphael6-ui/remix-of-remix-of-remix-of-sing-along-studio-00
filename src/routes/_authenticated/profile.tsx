@@ -5,7 +5,10 @@ import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { getAvatarSignedUrl } from "@/lib/storage.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, Music, Camera, Loader2 } from "lucide-react";
+import { LogOut, Save, Trophy, Music, Camera, Loader2, Flame, Sparkles, Lock, Settings } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { THEMES, getBadgesFor, type ThemeId } from "@/lib/constants";
+import { useTheme } from "@/lib/theme";
 
 export const Route = createFileRoute("/_authenticated/profile")({ component: ProfileScreen });
 
@@ -19,6 +22,7 @@ function ProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [theme, setTheme] = useTheme();
 
   useEffect(() => {
     if (q.data?.profile) {
@@ -80,10 +84,23 @@ function ProfileScreen() {
   }
 
   const p = q.data?.profile;
+  const meta = (p ?? {}) as { points?: number; current_streak?: number; longest_streak?: number; best_score?: number; performances_count?: number };
+  const points = Number(meta.points ?? 0);
+  const streak = Number(meta.current_streak ?? 0);
+  const longest = Number(meta.longest_streak ?? 0);
+  const badges = p ? getBadgesFor({
+    points,
+    longest_streak: longest,
+    performances_count: Number(meta.performances_count ?? 0),
+    best_score: Number(meta.best_score ?? 0),
+  }) : [];
 
   return (
     <div className="px-5 pt-4 pb-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Meu perfil</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Meu perfil</h1>
+        <Link to="/settings" className="w-10 h-10 rounded-full glass flex items-center justify-center" aria-label="Ajustes"><Settings className="w-5 h-5" /></Link>
+      </div>
 
       <div className="flex items-center gap-4 mb-6">
         <button
@@ -109,6 +126,49 @@ function ProfileScreen() {
         <Stat icon={<Music className="w-4 h-4" />} label="Cantadas" value={p?.performances_count ?? 0} />
         <Stat icon={<Trophy className="w-4 h-4" />} label="Melhor" value={p?.best_score ?? 0} />
         <Stat icon={<Trophy className="w-4 h-4" />} label="Média" value={p && p.performances_count > 0 ? Math.round(Number(p.total_score) / p.performances_count) : 0} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-6">
+        <Stat icon={<Sparkles className="w-4 h-4" />} label="Pontos" value={points} />
+        <Stat icon={<Flame className="w-4 h-4" />} label={`Streak (recorde ${longest})`} value={streak} />
+      </div>
+
+      {badges.length > 0 && (
+        <div className="mb-6">
+          <p className="text-xs uppercase text-muted-foreground mb-2 px-1">Conquistas</p>
+          <div className="flex flex-wrap gap-2">
+            {badges.map((b) => (
+              <span key={b.id} className="glass rounded-full px-3 py-1.5 text-xs flex items-center gap-1">
+                <span>{b.emoji}</span> <span>{b.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mb-6">
+        <p className="text-xs uppercase text-muted-foreground mb-2 px-1">Tema do app</p>
+        <div className="grid grid-cols-3 gap-2">
+          {(Object.keys(THEMES) as ThemeId[]).map((id) => {
+            const t = THEMES[id];
+            const unlocked = points >= t.unlockPoints;
+            const active = theme === id;
+            return (
+              <button
+                key={id}
+                disabled={!unlocked}
+                onClick={() => setTheme(id)}
+                className={`glass rounded-2xl p-3 text-left transition ${active ? "border-primary" : ""} ${!unlocked ? "opacity-50" : "hover:border-primary"}`}
+              >
+                <div className="w-full h-8 rounded-lg mb-2" style={{ background: `linear-gradient(135deg, ${t.primary}, ${t.accent})` }} />
+                <p className="text-xs font-semibold">{t.label}</p>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  {unlocked ? (active ? "Ativo" : t.description) : (<><Lock className="w-3 h-3" /> {t.unlockPoints} pts</>)}
+                </p>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-3">

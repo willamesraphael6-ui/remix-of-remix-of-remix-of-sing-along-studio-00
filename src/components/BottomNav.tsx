@@ -1,12 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, Trophy, User, ListMusic, Settings } from "lucide-react";
+import { Home, Trophy, User, ListMusic, Moon } from "lucide-react";
 
 const items = [
   { to: "/home", label: "Início", icon: Home },
   { to: "/history", label: "Minhas", icon: ListMusic },
   { to: "/leaderboard", label: "Ranking", icon: Trophy },
+  { to: "/relax", label: "Relaxar", icon: Moon },
   { to: "/profile", label: "Perfil", icon: User },
-  { to: "/settings", label: "Ajustes", icon: Settings },
 ] as const;
 
 export function BottomNav() {

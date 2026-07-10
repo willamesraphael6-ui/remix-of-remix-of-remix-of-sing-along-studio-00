@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getLeaderboard } from "@/lib/leaderboard.functions";
-import { Trophy, Crown } from "lucide-react";
+import { Trophy, Crown, Flame } from "lucide-react";
+import { getBadgesFor } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/leaderboard")({ component: LeaderboardScreen });
 
@@ -44,22 +45,37 @@ function LeaderboardScreen() {
       )}
 
       <div className="space-y-2">
-        {rest.map((p: typeof items[number], i: number) => (
+        {rest.map((p: typeof items[number], i: number) => {
+          const meta = p as typeof p & { points?: number; current_streak?: number; longest_streak?: number };
+          const badges = getBadgesFor({
+            points: Number(meta.points ?? 0),
+            longest_streak: Number(meta.longest_streak ?? 0),
+            performances_count: p.performances_count,
+            best_score: p.best_score,
+          }).slice(0, 2);
+          const streak = Number(meta.current_streak ?? 0);
+          return (
           <div key={p.id} className="glass rounded-2xl p-3 flex items-center gap-3">
             <span className="w-6 text-center text-sm font-bold text-muted-foreground">{i + 4}</span>
             <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex items-center justify-center">
               {p.avatar_url ? <img src={p.avatar_url} alt="" className="w-full h-full object-cover" /> : <span>{p.stage_name[0]?.toUpperCase()}</span>}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{p.stage_name}</p>
-              <p className="text-xs text-muted-foreground">{p.performances_count} performances</p>
+              <p className="text-sm font-medium truncate flex items-center gap-1">
+                {p.stage_name}
+                {streak > 0 && <span className="text-[10px] text-orange-400 flex items-center gap-0.5"><Flame className="w-3 h-3" />{streak}</span>}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {Number(meta.points ?? 0)} pts · {badges.map((b) => b.emoji).join(" ")}
+              </p>
             </div>
             <div className="text-right">
               <p className="text-sm font-bold neon-text">{p.average}</p>
               <p className="text-[10px] text-muted-foreground">média</p>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {items.length === 0 && !q.isLoading && (
