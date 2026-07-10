@@ -5,7 +5,8 @@ import { getMyProfile, updateMyProfile } from "@/lib/profile.functions";
 import { getAvatarSignedUrl } from "@/lib/storage.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LogOut, Save, Trophy, Music, Camera, Loader2, Flame, Sparkles, Lock } from "lucide-react";
+import { LogOut, Save, Trophy, Music, Camera, Loader2, Flame, Sparkles, Lock, Settings } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { THEMES, getBadgesFor, type ThemeId } from "@/lib/constants";
 import { useTheme } from "@/lib/theme";
 
@@ -96,7 +97,10 @@ function ProfileScreen() {
 
   return (
     <div className="px-5 pt-4 pb-8 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Meu perfil</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Meu perfil</h1>
+        <Link to="/settings" className="w-10 h-10 rounded-full glass flex items-center justify-center" aria-label="Ajustes"><Settings className="w-5 h-5" /></Link>
+      </div>
 
       <div className="flex items-center gap-4 mb-6">
         <button
