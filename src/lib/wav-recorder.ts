@@ -4,14 +4,25 @@ export class WavRecorder {
   private ctx?: AudioContext;
   private processor?: ScriptProcessorNode;
   private source?: MediaStreamAudioSourceNode;
+  private silentSink?: GainNode;
   private chunks: Float32Array[] = [];
   private sampleRate = 44100;
   public level = 0;
 
   async start() {
-    this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    // Peça um stream mono, sem AGC (mantém volume estável), com echoCancellation
+    // e noiseSuppression pra deixar a voz limpa.
+    this.stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: false,
+      },
+    });
     const AC: typeof AudioContext = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    this.ctx = new AC();
+    // latencyHint "interactive" reduz travamentos em Safari/Chrome mobile.
+    this.ctx = new AC({ latencyHint: "interactive" });
     this.sampleRate = this.ctx.sampleRate;
     this.source = this.ctx.createMediaStreamSource(this.stream);
     this.processor = this.ctx.createScriptProcessor(4096, 1, 1);
@@ -24,13 +35,20 @@ export class WavRecorder {
       for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
       this.level = Math.sqrt(sum / data.length);
     };
+    // IMPORTANTE: NÃO ligar o processor direto em ctx.destination — isso
+    // manda o microfone pro alto-falante e cria feedback/estalos ("travamentos").
+    // Usamos um GainNode em silêncio só pra fazer o ScriptProcessor rodar.
+    this.silentSink = this.ctx.createGain();
+    this.silentSink.gain.value = 0;
     this.source.connect(this.processor);
-    this.processor.connect(this.ctx.destination);
+    this.processor.connect(this.silentSink);
+    this.silentSink.connect(this.ctx.destination);
   }
 
   async stop(): Promise<Blob> {
     this.processor?.disconnect();
     this.source?.disconnect();
+    this.silentSink?.disconnect();
     this.stream?.getTracks().forEach((t) => t.stop());
     const merged = mergeChunks(this.chunks);
     const downsampled = downsample(merged, this.sampleRate, 16000);
